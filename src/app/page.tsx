@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import ptBr from 'dayjs/locale/pt-br'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Edit, Trash } from 'lucide-react'
 
 dayjs.locale(ptBr)
 
@@ -47,17 +47,35 @@ export default async function Home() {
               alt=""
               className="aspect-video w-full rounded-lg object-cover"
             />
+
             <p className="text-lg leading-relaxed text-gray-100">
               {memory.excerpt}
             </p>
 
-            <Link
-              href={`/memories/${memory.id}`}
-              className="flex items-center gap-2 text-sm text-gray-100 hover:text-gray-200"
-            >
-              Ler mais
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            <div className="flex items-center justify-between">
+              <Link
+                href={`/memories/${memory.id}`}
+                className="flex items-center gap-2 text-sm text-gray-100 hover:text-gray-200"
+              >
+                Ler mais
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+
+              <div className="flex gap-8">
+                <Link
+                  href={`/`}
+                  className="flex cursor-pointer items-center gap-1.5 text-sm text-gray-100 hover:text-green-500"
+                >
+                  <Edit className="h-4 w-4" />
+                  Editar
+                </Link>
+
+                <button className="flex cursor-pointer items-center gap-1.5 text-sm text-gray-100 hover:text-red-500">
+                  <Trash className="h-4 w-4" />
+                  Excluir
+                </button>
+              </div>
+            </div>
           </div>
         )
       })}
