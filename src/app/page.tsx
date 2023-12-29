@@ -63,7 +63,7 @@ export default async function Home() {
 
               <div className="flex gap-8">
                 <Link
-                  href={`/`}
+                  href={`/memories/edit/${memory.id}`}
                   className="flex cursor-pointer items-center gap-1.5 text-sm text-gray-100 hover:text-green-500"
                 >
                   <Edit className="h-4 w-4" />

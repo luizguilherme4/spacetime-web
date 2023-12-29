@@ -3,39 +3,60 @@
 import { Camera } from 'lucide-react'
 import { MediaPicker } from './MediaPicker'
 import Cookie from 'js-cookie'
-import { FormEvent } from 'react'
+import { FormEvent, useState } from 'react'
 import { api } from '@/lib/api'
 import { useRouter } from 'next/navigation'
+import { UniqueMemory } from '@/app/memories/edit/[editMemory]/page'
 
-export function NewMemoryForm() {
+export function EditMemoryForm({
+  id,
+  userId,
+  coverUrl,
+  content,
+  isPublic,
+  createAt,
+}: UniqueMemory) {
   const router = useRouter()
+
+  const [memory, setMemory] = useState<any>({
+    coverUrl,
+    content,
+    isPublic,
+  })
+
+  function handleChangeCoverUrl(image: File) {
+    setMemory((prevMemory: any) => ({
+      ...prevMemory,
+      coverUrl: image,
+    }))
+  }
 
   async function handleCreateMemory(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    const formData = new FormData(event.currentTarget)
+    const fileToUpload = memory?.coverUrl
 
-    const fileToUpload = formData.get('coverUrl')
+    let newCoverUrl = ''
 
-    let coverUrl = ''
-
-    if (fileToUpload) {
+    if (fileToUpload !== coverUrl) {
       const uploadFormData = new FormData()
       uploadFormData.set('file', fileToUpload)
 
       const uploadResponse = await api.post('/upload', uploadFormData)
 
-      coverUrl = uploadResponse.data.fileUrl
+      newCoverUrl = uploadResponse.data.fileUrl
+    } else {
+      newCoverUrl = fileToUpload
     }
 
     const token = Cookie.get('token')
 
-    await api.post(
-      '/memories',
+    await api.put(
+      `/memories/${id}`,
       {
-        coverUrl,
-        content: formData.get('content'),
-        isPublic: formData.get('isPublic'),
+        coverUrl: newCoverUrl,
+        content: memory?.content,
+        isPublic: memory?.isPublic,
       },
       {
         headers: {
@@ -45,6 +66,7 @@ export function NewMemoryForm() {
     )
 
     router.push('/')
+    router.refresh()
   }
 
   return (
@@ -55,7 +77,7 @@ export function NewMemoryForm() {
           className="flex cursor-pointer items-center gap-1.5 text-sm text-gray-200 hover:text-gray-100"
         >
           <Camera className="h-4 w-4" />
-          Anexar mídia
+          Alterar mídia
         </label>
 
         <label
@@ -66,20 +88,34 @@ export function NewMemoryForm() {
             type="checkbox"
             name="isPublic"
             id="isPublic"
-            value="true"
+            checked={memory?.isPublic}
+            onChange={(e) =>
+              setMemory((prevMemory: any) => ({
+                ...prevMemory,
+                isPublic: e.target.checked,
+              }))
+            }
             className="h-4 w-4 rounded border-gray-400 bg-gray-700 text-purple-500"
           />
-          Tornar memória pública
+          Memória pública
         </label>
       </div>
 
-      <MediaPicker />
+      <MediaPicker cover={coverUrl} changeImage={handleChangeCoverUrl} />
 
       <textarea
         name="content"
+        value={memory?.content}
+        onChange={(e) =>
+          setMemory((prevMemory: any) => ({
+            ...prevMemory,
+            content: e.target.value,
+          }))
+        }
         spellCheck={false}
+        rows={4}
         maxLength={700}
-        className="w-full flex-1 resize-none rounded border-0 bg-transparent p-0 text-lg leading-relaxed text-gray-100 placeholder:text-gray-400 focus:ring-0"
+        className="w-full flex-1 resize-none overflow-y-hidden rounded border-0 bg-transparent p-0 text-lg leading-relaxed text-gray-100 placeholder:text-gray-400 focus:ring-0"
         placeholder="Fique livre para adicionar fotos, vídeos e relatos sobre essa experiência que você quer lembrar para sempre"
       />
 
