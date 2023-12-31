@@ -5,7 +5,8 @@ import dayjs from 'dayjs'
 import ptBr from 'dayjs/locale/pt-br'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, Edit, Trash } from 'lucide-react'
+import { ArrowRight, Edit } from 'lucide-react'
+import { DeleteButton } from '@/components/DeleteButton'
 
 dayjs.locale(ptBr)
 
@@ -31,6 +32,18 @@ export default async function Home() {
   })
 
   const memories: Memory[] = response.data
+
+  const handleDeleteMemory = async (id: string) => {
+    'use server'
+
+    await api
+      .delete(`/memories/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .catch((error) => console.log(error))
+  }
 
   return (
     <div className="flex flex-col gap-10 p-8">
@@ -70,10 +83,10 @@ export default async function Home() {
                   Editar
                 </Link>
 
-                <button className="flex cursor-pointer items-center gap-1.5 text-sm text-gray-100 hover:text-red-500">
-                  <Trash className="h-4 w-4" />
-                  Excluir
-                </button>
+                <DeleteButton
+                  deleteMemory={handleDeleteMemory}
+                  id={memory.id}
+                />
               </div>
             </div>
           </div>
